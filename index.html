@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos Firebase</title>
+    
+    
+</head>
+<body>
+    <h1>Area de registro</h1>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="pass" placeholder="Contraseña" required>
+    <button onclick="enviar()">Enviar</button>
+
+    <h1>Area de acceso</h1>
+    <input type="email" id="emailA" placeholder="Email" required>
+    <input type="password" id="passA" placeholder="Contraseña" required>
+    <button onclick="acceso()">Acceso</button>
+
+    <h1 id="login"></h1>
+
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-auth.js"></script>
+    <script src="js/initialice.js"></script>
+    <script src="js/index.js"></script>
+</body>
+</html>
