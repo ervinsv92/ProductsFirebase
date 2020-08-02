@@ -49,8 +49,6 @@ function guardarProducto(producto){
             console.error("Error adding document: ", error);
         });
     }
-
-    
 }
 
 function validarFormProductos(){
@@ -132,9 +130,7 @@ document.addEventListener('click', function (event) {
         
         guardarProducto(producto);   
     }
-
 }, false);
-
 
 function cargaProducto(e){
     _producto = JSON.parse(e.target.dataset.producto);

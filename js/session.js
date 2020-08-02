@@ -2,7 +2,7 @@ var _usuario;
 
 //Es un observador que verifica constantemente si hay un usuario logueado
 firebase.auth().onAuthStateChanged(function(user){
-    if(user.emailVerified){
+    if(user && user.emailVerified){
         _usuario = user;
     }else{
         document.location = "index.html"

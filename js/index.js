@@ -2,7 +2,7 @@
   
   //Es un observador que verifica constantemente si hay un usuario logueado
   firebase.auth().onAuthStateChanged(function(user){
-      if(user){
+      if(user && user.emailVerified){
           //si el Usuario está loguiado
           var displayName = user.displayName;
           var email = user.email;
@@ -12,8 +12,12 @@
           var uid = user.id;
           var providerData = user.providerData;
 
-          document.getElementById("login").innerHTML = `<p>Logueado : ${email} ${emailVerified?'':'- No verificado'}</p><button onclick="cerrarSesion()">Cerrar sesión</button>`;
+          //document.getElementById("login").innerHTML = `<p>Logueado : ${email} ${emailVerified?'':'- No verificado'}</p><button onclick="cerrarSesion()">Cerrar sesión</button>`;
           document.location = "mant_productos.html"
+      }else if(user && !user.emailVerified){
+          //Si el usuario no está logiado
+          alert(`${user.email} verifica el correo e inicia sesion para continuar`)
+          cerrarSesion()
       }else{
           //Si el usuario no está logiado
           document.getElementById("login").innerHTML = "No Logueado";
@@ -61,9 +65,17 @@ function acceso(){
 function cerrarSesion(){
     firebase.auth().signOut()
     .then(function(){
+        limpiarCampos()
         console.log("Salir");
     })
     .catch(function(error){
         console.error(error);
     });
+}
+
+function limpiarCampos(){
+    document.getElementById("email").value = ""
+    document.getElementById("pass").value = ""
+    document.getElementById("emailA").value = ""
+    document.getElementById("passA").value = ""
 }
