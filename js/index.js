@@ -36,6 +36,7 @@ function enviar(){
     .catch(function(error){
         var errorCode = error.code;
         var errorMessage = error.message;
+        alert(errorMessage);
         console.error(errorMessage);
     });
 }
@@ -58,6 +59,7 @@ function acceso(){
     firebase.auth().signInWithEmailAndPassword(emailA, passA).catch(function(){
         var errorCode = error.code;
         var errorMessage = error.message;
+        alert(errorMessage)
         console.error(errorMessage);
     });
 }
