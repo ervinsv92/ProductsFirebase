@@ -13,6 +13,8 @@ var txtPrecio = document.getElementById('txtPrecio')
 var btnGuardar = document.getElementById('btnGuardar')
 var fImagen = document.getElementById('fImagen')
 var pArchivo = document.getElementById('pArchivo')
+var btnCancelar = document.getElementById('btnCancelar')
+
 var rutaArchivo;
 var _producto = null;
 
@@ -26,22 +28,28 @@ function guardarProducto(producto){
     
     if(producto.hasOwnProperty('id')){
 
-        var productoBD = db.collection("productos").doc(producto.id);
-        producto.rutaArchivo = rutaArchivo!=""?rutaArchivo:producto.rutaArchivo;
+        var productoBD = db.collection("productos").doc(producto.id)
 
-        productoBD.update(
-            {
-                nombre:producto.nombre,
-                precio:producto.precio,
-                rutaArchivo:producto.rutaArchivo
-            }
-        ).then(function(docRef){
-            limpiarFormProductos();
-            alert("Producto actualizado")
-        }).catch(function(error){
-            alert("Error")
-            console.error(error);
-        });
+        db.collection("productos").doc(producto.id).get()
+        .then(function(doc){
+            if(doc){
+                producto.rutaArchivo = rutaArchivo!="" && rutaArchivo != undefined?rutaArchivo:doc.data().rutaArchivo;
+
+                productoBD.update(
+                    {
+                        nombre:producto.nombre,
+                        precio:producto.precio,
+                        rutaArchivo:producto.rutaArchivo
+                    }
+                ).then(function(docRef){
+                    limpiarFormProductos();
+                    console.log('Producto actualizado')
+                }).catch(function(error){
+                    alert("Error")
+                    console.error(error);
+                });
+                    }
+                });       
     }else{
         db.collection("productos").add({
             nombre:producto.nombre,
@@ -50,7 +58,7 @@ function guardarProducto(producto){
         })
         .then(function(docRef) {
             limpiarFormProductos();
-            alert("Producto guardado")
+            console.log('Producto guardado')
             console.log("Document written with ID: ", docRef.id);
         })
         .catch(function(error) {
@@ -67,7 +75,7 @@ function validarFormProductos(){
     }else if(txtPrecio.value.trim() == "" || isNaN(txtPrecio.value.trim()) || parseFloat(txtPrecio.value.trim())<=0){
         alert("El precio deber ser un numero mayor a 0")
         return false;
-    }else if(fImagen.files.length <= 0){
+    }else if(!_producto && fImagen.files.length <= 0){
         alert("Debe cargar la imagen del producto")
         return false;
     }
@@ -92,6 +100,7 @@ db.collection("productos").onSnapshot((querySnapshot) => {
         let trString = `
             <td>${producto.data().nombre}</td>
             <td>${producto.data().precio}</td>
+            <td><img class='estiloImagen' src='${producto.data().rutaArchivo}'/></td>
             <td>
                 <button type='button' data-producto='${JSON.stringify(producto.data())}' data-id='${producto.id}' onclick="cargaProducto()" class='btn btn-warning btnModificar'>M</button>
                 <button type='button' data-producto='${JSON.stringify(producto.data())}' data-id='${producto.id}' onclick="eliminaProducto()" class='btn btn-danger btnEliminar'>X</button>
@@ -138,6 +147,8 @@ document.addEventListener('click', function (event) {
         }     
         
         guardarProducto(producto);   
+    }else if (event.target.matches('#btnCancelar')){
+        limpiarFormProductos();
     }
 }, false);
 
@@ -154,7 +165,9 @@ fImagen.addEventListener('change', function(e){
 
         },
         function complete(){
-            rutaArchivo = "imagenes/"+file.name;
+            storageRef.getDownloadURL().then((url)=>{
+                rutaArchivo = url;
+            });
         }
     );
 });
@@ -175,7 +188,7 @@ function eliminaProducto(e){
     }
     
     db.collection("productos").doc(id).delete().then(function() {
-        alert("Producto eliminado");
+        console.log('Producto eliminado')
     }).catch(function(error) {
         alert("Error al borrar producto");
         console.error("Error removing document: ", error);
