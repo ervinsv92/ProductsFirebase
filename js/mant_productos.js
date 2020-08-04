@@ -11,6 +11,9 @@ firebase.initializeApp({
 var txtNombre = document.getElementById('txtNombre')
 var txtPrecio = document.getElementById('txtPrecio')
 var btnGuardar = document.getElementById('btnGuardar')
+var fImagen = document.getElementById('fImagen')
+var pArchivo = document.getElementById('pArchivo')
+var rutaArchivo;
 var _producto = null;
 
 window.onload = function(){
@@ -22,10 +25,15 @@ window.onload = function(){
 function guardarProducto(producto){
     
     if(producto.hasOwnProperty('id')){
-        db.collection("productos").doc(producto.id).update(
+
+        var productoBD = db.collection("productos").doc(producto.id);
+        producto.rutaArchivo = rutaArchivo!=""?rutaArchivo:producto.rutaArchivo;
+
+        productoBD.update(
             {
                 nombre:producto.nombre,
-                precio:producto.precio
+                precio:producto.precio,
+                rutaArchivo:producto.rutaArchivo
             }
         ).then(function(docRef){
             limpiarFormProductos();
@@ -37,7 +45,8 @@ function guardarProducto(producto){
     }else{
         db.collection("productos").add({
             nombre:producto.nombre,
-            precio:producto.precio
+            precio:producto.precio,
+            rutaArchivo:rutaArchivo
         })
         .then(function(docRef) {
             limpiarFormProductos();
@@ -58,6 +67,9 @@ function validarFormProductos(){
     }else if(txtPrecio.value.trim() == "" || isNaN(txtPrecio.value.trim()) || parseFloat(txtPrecio.value.trim())<=0){
         alert("El precio deber ser un numero mayor a 0")
         return false;
+    }else if(fImagen.files.length <= 0){
+        alert("Debe cargar la imagen del producto")
+        return false;
     }
 
     return true;
@@ -66,6 +78,8 @@ function validarFormProductos(){
 function limpiarFormProductos(){
     txtNombre.value = "";
     txtPrecio.value = "";
+    fImagen.value = null;
+    pArchivo.value = "0";
     _producto = null;
     btnGuardar.textContent = "Guardar"
 }
@@ -91,21 +105,16 @@ db.collection("productos").onSnapshot((querySnapshot) => {
 });
 
 
-document.addEventListener('click', function (event) {
-
-	// If the clicked element doesn't have the right selector, bail
-	//if (!event.target.matches('.btnModificar') && !event.target.matches('.btnEliminar')) return;
-
-	// Don't follow the link
-	event.preventDefault();
-
-	// Log the clicked element in the console
-    //console.log(event.target);
-    
+document.addEventListener('click', function (event) {    
     if(event.target.matches('.btnModificar')){
-        cargaProducto(event)
+        // Don't follow the link
+        cargaProducto(event);
+        event.preventDefault();
+        
     }else if(event.target.matches('.btnEliminar')){
+        // Don't follow the link
         eliminaProducto(event)
+        event.preventDefault();
     }else if(event.target.matches('#btnGuardar')){
         
         if(!validarFormProductos()){
@@ -131,6 +140,24 @@ document.addEventListener('click', function (event) {
         guardarProducto(producto);   
     }
 }, false);
+
+fImagen.addEventListener('change', function(e){
+    var file = e.target.files[0];
+    var storageRef = firebase.storage().ref('imagenes/'+file.name);
+    var task = storageRef.put(file);
+    task.on('state_changed', 
+        function progress(snapshot){
+            var porcentaje = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            pArchivo.value = porcentaje;
+        },
+        function error(err){
+
+        },
+        function complete(){
+            rutaArchivo = "imagenes/"+file.name;
+        }
+    );
+});
 
 function cargaProducto(e){
     _producto = JSON.parse(e.target.dataset.producto);
